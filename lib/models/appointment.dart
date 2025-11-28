@@ -2,6 +2,7 @@ class AppointmentFields {
   static const tableName = 'appointments';
 
   static const id = '_id';
+  static const userId = 'user_id';
   static const patientName = 'patient_name';
   static const doctorName = 'doctor_name';
   static const date = 'date';
@@ -9,6 +10,7 @@ class AppointmentFields {
 
   static const values = [
     id,
+    userId,
     patientName,
     doctorName,
     date,
@@ -18,6 +20,7 @@ class AppointmentFields {
 
 class AppointmentModel {
   int? id;
+  final int userId;
   final String patientName;
   final String doctorName;
   final DateTime date;
@@ -25,6 +28,7 @@ class AppointmentModel {
 
   AppointmentModel({
     this.id,
+    required this.userId,
     required this.patientName,
     required this.doctorName,
     required this.date,
@@ -33,6 +37,7 @@ class AppointmentModel {
 
   Map<String, Object?> toJson() => {
         AppointmentFields.id: id,
+        AppointmentFields.userId: userId,
         AppointmentFields.patientName: patientName,
         AppointmentFields.doctorName: doctorName,
         AppointmentFields.date: date.toIso8601String(),
@@ -41,6 +46,7 @@ class AppointmentModel {
 
   static AppointmentModel fromJson(Map<String, Object?> json) => AppointmentModel(
         id: json[AppointmentFields.id] as int?,
+        userId: json[AppointmentFields.userId] as int,
         patientName: json[AppointmentFields.patientName] as String,
         doctorName: json[AppointmentFields.doctorName] as String,
         date: DateTime.parse(json[AppointmentFields.date] as String),
@@ -49,6 +55,7 @@ class AppointmentModel {
 
   AppointmentModel copy({
     int? id,
+    int? userId,
     String? patientName,
     String? doctorName,
     DateTime? date,
@@ -56,6 +63,7 @@ class AppointmentModel {
   }) =>
       AppointmentModel(
         id: id ?? this.id,
+        userId: userId ?? this.userId,
         patientName: patientName ?? this.patientName,
         doctorName: doctorName ?? this.doctorName,
         date: date ?? this.date,

@@ -20,21 +20,52 @@ class AppointmentDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDatabase,
+      onUpgrade: _upgradeDatabase,
     );
   }
 
   Future<void> _createDatabase(Database db, int version) async {
+    // Tabla de usuarios
+    await db.execute('''
+      CREATE TABLE users (
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        full_name TEXT NOT NULL
+      )
+    ''');
+
+    // Tabla de citas con user_id
     await db.execute('''
       CREATE TABLE ${AppointmentFields.tableName} (
         ${AppointmentFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${AppointmentFields.userId} INTEGER NOT NULL,
         ${AppointmentFields.patientName} TEXT NOT NULL,
         ${AppointmentFields.doctorName} TEXT NOT NULL,
         ${AppointmentFields.date} TEXT NOT NULL,
-        ${AppointmentFields.notes} TEXT NOT NULL
+        ${AppointmentFields.notes} TEXT NOT NULL,
+        FOREIGN KEY (${AppointmentFields.userId}) REFERENCES users(_id)
       )
     ''');
+  }
+
+  Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Agregar tabla de usuarios
+      await db.execute('''
+        CREATE TABLE users (
+          _id INTEGER PRIMARY KEY AUTOINCREMENT,
+          email TEXT NOT NULL UNIQUE,
+          password TEXT NOT NULL,
+          full_name TEXT NOT NULL
+        )
+      ''');
+      // Agregar columna user_id a appointments
+      await db.execute(
+          'ALTER TABLE ${AppointmentFields.tableName} ADD COLUMN ${AppointmentFields.userId} INTEGER DEFAULT 1');
+    }
   }
 
   Future<AppointmentModel> create(AppointmentModel appt) async {
@@ -48,6 +79,20 @@ class AppointmentDatabase {
 
     final result = await db.query(
       AppointmentFields.tableName,
+      orderBy: '${AppointmentFields.date} DESC',
+    );
+
+    return result.map((e) => AppointmentModel.fromJson(e)).toList();
+  }
+
+  /// Obtener citas solo del usuario autenticado
+  Future<List<AppointmentModel>> readAllByUser(int userId) async {
+    final db = await database;
+
+    final result = await db.query(
+      AppointmentFields.tableName,
+      where: '${AppointmentFields.userId} = ?',
+      whereArgs: [userId],
       orderBy: '${AppointmentFields.date} DESC',
     );
 

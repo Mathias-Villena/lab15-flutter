@@ -5,8 +5,9 @@ import '../models/appointment.dart';
 
 class AppointmentDetailsView extends StatefulWidget {
   final AppointmentModel? appointment;
+  final int userId;
 
-  const AppointmentDetailsView({super.key, this.appointment});
+  const AppointmentDetailsView({super.key, this.appointment, required this.userId});
 
   @override
   State<AppointmentDetailsView> createState() =>
@@ -35,10 +36,18 @@ class _AppointmentDetailsViewState extends State<AppointmentDetailsView> {
   }
 
   save() async {
+    if (patientCtrl.text.isEmpty || doctorCtrl.text.isEmpty || notesCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Completa todos los campos')),
+      );
+      return;
+    }
+
     if (isEditing) {
       await AppointmentDatabase.instance.update(
         AppointmentModel(
           id: widget.appointment!.id,
+          userId: widget.userId,
           patientName: patientCtrl.text,
           doctorName: doctorCtrl.text,
           notes: notesCtrl.text,
@@ -48,6 +57,7 @@ class _AppointmentDetailsViewState extends State<AppointmentDetailsView> {
     } else {
       await AppointmentDatabase.instance.create(
         AppointmentModel(
+          userId: widget.userId,
           patientName: patientCtrl.text,
           doctorName: doctorCtrl.text,
           notes: notesCtrl.text,

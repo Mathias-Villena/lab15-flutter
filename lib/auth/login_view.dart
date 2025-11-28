@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../views/home_view.dart';
+import '../database/user_database.dart';
+import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,6 +14,34 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  bool isLoading = false;
+  String? errorMessage;
+
+  void login() async {
+    if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
+      setState(() => errorMessage = 'Completa todos los campos');
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final user = await UserDatabase.instance.login(emailCtrl.text, passCtrl.text);
+
+    if (!mounted) return;
+
+    if (user != null) {
+      // Guardar usuario autenticado en shared preferences o un servicio
+      // Por ahora lo pasamos a HomeView
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeView(userId: user.id!)),
+      );
+    } else {
+      setState(() => errorMessage = 'Correo o contraseña incorrectos');
+    }
+
+    setState(() => isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +66,47 @@ class _LoginViewState extends State<LoginView> {
             buildInput(emailCtrl, "Correo", Icons.email),
             const SizedBox(height: 15),
             buildInput(passCtrl, "Contraseña", Icons.lock, isPass: true),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+            if (errorMessage != null)
+              Text(
+                errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 50, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeView()),
-                );
-              },
-              child: const Text("Ingresar", style: TextStyle(fontSize: 18)),
+              onPressed: isLoading ? null : login,
+              child: isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text("Ingresar", style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("¿Sin cuenta? ",
+                    style: TextStyle(color: Colors.white54)),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterView()),
+                    );
+                  },
+                  child: const Text(
+                    "Registrate",
+                    style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

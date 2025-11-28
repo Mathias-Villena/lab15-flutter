@@ -6,7 +6,9 @@ import '../models/appointment.dart';
 import 'appointment_details_view.dart';
 
 class AppointmentsListView extends StatefulWidget {
-  const AppointmentsListView({super.key});
+  final int userId;
+
+  const AppointmentsListView({super.key, required this.userId});
 
   @override
   State<AppointmentsListView> createState() => _AppointmentsListViewState();
@@ -16,7 +18,7 @@ class _AppointmentsListViewState extends State<AppointmentsListView> {
   List<AppointmentModel> appointments = [];
 
   loadData() async {
-    appointments = await AppointmentDatabase.instance.readAll();
+    appointments = await AppointmentDatabase.instance.readAllByUser(widget.userId);
     setState(() {});
   }
 
@@ -40,7 +42,9 @@ class _AppointmentsListViewState extends State<AppointmentsListView> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AppointmentDetailsView()),
+            MaterialPageRoute(
+              builder: (_) => AppointmentDetailsView(userId: widget.userId),
+            ),
           );
           loadData();
         },
@@ -63,7 +67,7 @@ class _AppointmentsListViewState extends State<AppointmentsListView> {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            AppointmentDetailsView(appointment: appt),
+                            AppointmentDetailsView(appointment: appt, userId: widget.userId),
                       ),
                     );
                     loadData();
