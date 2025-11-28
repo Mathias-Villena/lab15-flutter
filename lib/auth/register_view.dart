@@ -117,7 +117,8 @@ class _RegisterViewState extends State<RegisterView> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text("Registrarse", style: TextStyle(fontSize: 18)),
+                  : const Text("Registrarse",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
             const SizedBox(height: 15),
             Row(

@@ -86,7 +86,8 @@ class _LoginViewState extends State<LoginView> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text("Ingresar", style: TextStyle(fontSize: 18)),
+                  : const Text("Ingresar",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
             const SizedBox(height: 15),
             Row(

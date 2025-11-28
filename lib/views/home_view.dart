@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import 'appointment_list_view.dart';
 import 'profile_view.dart';
-import '../auth/login_view.dart';
+// login_view import removed because logout button was removed
 
 class HomeView extends StatefulWidget {
   final int userId;
@@ -16,7 +16,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   int index = 0;
 
-  late final screens = [
+  late final List<Widget> screens = [
     AppointmentsListView(userId: widget.userId),
     ProfileView(userId: widget.userId),
   ];
@@ -31,34 +31,17 @@ class _HomeViewState extends State<HomeView> {
         unselectedItemColor: Colors.white54,
         currentIndex: index,
         onTap: (i) => setState(() => index = i),
-        items: [
-          const BottomNavigationBarItem(
+        items: const [
+          BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: "Citas",
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: "Perfil",
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.logout),
-            label: "Salir",
-            tooltip: "Cerrar sesión",
           ),
         ],
       ),
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Si el índice cambia a 2, hacer logout
-    if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginView()),
-      );
-    }
   }
 }
